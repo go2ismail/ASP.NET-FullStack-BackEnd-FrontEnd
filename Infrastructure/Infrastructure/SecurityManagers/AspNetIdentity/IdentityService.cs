@@ -10,63 +10,51 @@ using Application.Features.Accounts.Queries;
 using Application.Features.Members.Commands;
 using Application.Services.Externals;
 using Application.Services.Repositories;
+
 using Domain.Entities;
+
 using Infrastructure.DataAccessManagers.EFCores.Contexts;
 using Infrastructure.SecurityManagers.RoleClaims;
 using Infrastructure.SecurityManagers.Tokens;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
+
 using System.Security.Claims;
 using System.Text;
 
 namespace Infrastructure.SecurityManagers.AspNetIdentity;
 
-public class IdentityService : IIdentityService
+public class IdentityService(
+    IOptions<IdentitySettings> identitySettings,
+    UserManager<ApplicationUser> userManager,
+    RoleManager<IdentityRole> roleManager,
+     SignInManager<ApplicationUser> signInManager,
+    IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
+    IAuthorizationService authorizationService,
+    ITokenService tokenService,
+    ITokenRepository tokenRepository,
+    IUnitOfWork unitOfWork,
+    INavigationService navigationService,
+    IRoleClaimService roleClaimService,
+    QueryContext queryContext
+        ) : IIdentityService
 {
 
-    private readonly IdentitySettings _identitySettings;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly ITokenService _tokenService;
-    private readonly ITokenRepository _tokenRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly INavigationService _navigationService;
-    private readonly IRoleClaimService _roleClaimService;
-    private readonly QueryContext _queryContext;
-
-    public IdentityService(
-        IOptions<IdentitySettings> identitySettings,
-        UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager,
-         SignInManager<ApplicationUser> signInManager,
-        IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-        IAuthorizationService authorizationService,
-        ITokenService tokenService,
-        ITokenRepository tokenRepository,
-        IUnitOfWork unitOfWork,
-        INavigationService navigationService,
-        IRoleClaimService roleClaimService,
-        QueryContext queryContext
-        )
-    {
-        _identitySettings = identitySettings.Value;
-        _userManager = userManager;
-        _roleManager = roleManager;
-        _signInManager = signInManager;
-        _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
-        _authorizationService = authorizationService;
-        _tokenService = tokenService;
-        _tokenRepository = tokenRepository;
-        _unitOfWork = unitOfWork;
-        _navigationService = navigationService;
-        _roleClaimService = roleClaimService;
-        _queryContext = queryContext;
-    }
+    private readonly IdentitySettings _identitySettings = identitySettings.Value;
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly RoleManager<IdentityRole> _roleManager = roleManager;
+    private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+    private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly ITokenService _tokenService = tokenService;
+    private readonly ITokenRepository _tokenRepository = tokenRepository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly INavigationService _navigationService = navigationService;
+    private readonly IRoleClaimService _roleClaimService = roleClaimService;
+    private readonly QueryContext _queryContext = queryContext;
 
     public async Task<GetClaimsByUserResult> GetClaimsByUserAsync(
         string userId,
@@ -93,12 +81,11 @@ public class IdentityService : IIdentityService
                 .ToList();
         }
 
-
         if (sortBy.Equals("Value", StringComparison.OrdinalIgnoreCase))
         {
             userClaims = sortDirection.Equals("asc", StringComparison.OrdinalIgnoreCase)
-                ? userClaims.OrderBy(x => x.Value).ToList()
-                : userClaims.OrderByDescending(x => x.Value).ToList();
+                ? [.. userClaims.OrderBy(x => x.Value)]
+                : [.. userClaims.OrderByDescending(x => x.Value)];
         }
 
         return new GetClaimsByUserResult { Claims = PagedList<ClaimDto>.FromList(userClaims, page, limit) };
@@ -140,8 +127,8 @@ public class IdentityService : IIdentityService
         if (sortBy.Equals("Value", StringComparison.OrdinalIgnoreCase))
         {
             userClaims = sortDirection.Equals("asc", StringComparison.OrdinalIgnoreCase)
-                ? userClaims.OrderBy(x => x.Value).ToList()
-                : userClaims.OrderByDescending(x => x.Value).ToList();
+                ? [.. userClaims.OrderBy(x => x.Value)]
+                : [.. userClaims.OrderByDescending(x => x.Value)];
         }
 
         return new GetClaimsResult { Data = PagedList<ClaimDto>.FromList(userClaims, page, limit) };
@@ -156,12 +143,7 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var roleIdentity = await _roleManager.FindByNameAsync(role);
-        if (roleIdentity == null)
-        {
-            throw new IdentityException($"Role not found. Role: {role}");
-        }
-
+        var roleIdentity = await _roleManager.FindByNameAsync(role) ?? throw new IdentityException($"Role not found. Role: {role}");
         var roleClaims = new List<string>();
         var claimsForRole = await _roleManager.GetClaimsAsync(roleIdentity);
         roleClaims.AddRange(claimsForRole.Select(x => x.Value).ToList());
@@ -222,8 +204,8 @@ public class IdentityService : IIdentityService
         if (sortBy.Equals("Name", StringComparison.OrdinalIgnoreCase))
         {
             roles = sortDirection.Equals("asc", StringComparison.OrdinalIgnoreCase)
-                ? roles.OrderBy(x => x.Name).ToList()
-                : roles.OrderByDescending(x => x.Name).ToList();
+                ? [.. roles.OrderBy(x => x.Name)]
+                : [.. roles.OrderByDescending(x => x.Name)];
         }
 
         foreach (var role in roles)
@@ -275,20 +257,14 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null)
-        {
-            throw new IdentityException($"User not found. ID: {userId}");
-        }
-
-        List<Claim> userClaims = (await _userManager.GetClaimsAsync(user)).ToList();
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new IdentityException($"User not found. ID: {userId}");
+        List<Claim> userClaims = [.. (await _userManager.GetClaimsAsync(user))];
 
         var roles = await _userManager.GetRolesAsync(user);
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        return new GetRolesByUserResult { Roles = PagedList<string>.FromList(roles.ToList(), page, limit) };
+        return new GetRolesByUserResult { Roles = PagedList<string>.FromList([.. roles], page, limit) };
     }
 
     public async Task<string?> GetUserNameAsync(string userId, CancellationToken cancellationToken = default)
@@ -315,6 +291,7 @@ public class IdentityService : IIdentityService
 
         var user = new ApplicationUser(
             email,
+            email.Split('@')[0].Replace(".", string.Empty),
             firstName,
             lastName,
             createdById
@@ -352,6 +329,7 @@ public class IdentityService : IIdentityService
 
         var user = new ApplicationUser(
             email,
+            email.Split('@')[0].Replace(".", string.Empty),
             firstName,
             lastName,
             null
@@ -408,13 +386,15 @@ public class IdentityService : IIdentityService
 
         var user = new ApplicationUser(
             email,
+            email.Split('@')[0].Replace(".", string.Empty),
             firstName,
             lastName,
             null
-        );
-
-        user.EmailConfirmed = emailConfirmed;
-        user.IsBlocked = isBlocked;
+        )
+        {
+            EmailConfirmed = emailConfirmed,
+            IsBlocked = isBlocked
+        };
         var result = await _userManager.CreateAsync(user, password);
 
         if (!result.Succeeded)
@@ -458,13 +438,7 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByEmailAsync(email);
-
-        if (user == null)
-        {
-            throw new Exception($"User not found. {email}");
-        }
-
+        var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception($"User not found. {email}");
         if (!string.IsNullOrEmpty(password))
         {
             var removePasswordResult = await _userManager.RemovePasswordAsync(user);
@@ -532,13 +506,7 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByEmailAsync(email);
-
-        if (user == null)
-        {
-            throw new Exception($"User not found. {email}");
-        }
-
+        var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception($"User not found. {email}");
         user.ProfilePictureName = profilePictureName;
         user.UpdatedAt = DateTime.UtcNow;
 
@@ -562,13 +530,7 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByEmailAsync(email);
-
-        if (user == null)
-        {
-            throw new Exception($"User not found. {email}");
-        }
-
+        var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception($"User not found. {email}");
         user.IsDeleted = true;
 
         var result = await _userManager.UpdateAsync(user);
@@ -595,13 +557,7 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null)
-        {
-            throw new IdentityException($"User not found. ID: {userId}");
-        }
-
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new IdentityException($"User not found. ID: {userId}");
         var result = await _userManager.IsInRoleAsync(user, role);
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -612,13 +568,7 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null)
-        {
-            throw new IdentityException($"User not found. ID: {userId}");
-        }
-
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new IdentityException($"User not found. ID: {userId}");
         foreach (var role in roles)
         {
             if (!await _userManager.IsInRoleAsync(user, role))
@@ -640,20 +590,14 @@ public class IdentityService : IIdentityService
         return new AddRolesToUserResult
         {
             UserId = userId,
-            Roles = userRoles.ToArray()
+            Roles = [.. userRoles]
         };
     }
     public async Task<DeleteRolesFromUserResult> DeleteRolesFromUserAsync(string userId, string[] roles, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null)
-        {
-            throw new IdentityException($"User not found. ID: {userId}");
-        }
-
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new IdentityException($"User not found. ID: {userId}");
         foreach (var role in roles)
         {
             if (await _userManager.IsInRoleAsync(user, role))
@@ -675,7 +619,7 @@ public class IdentityService : IIdentityService
         return new DeleteRolesFromUserResult
         {
             UserId = userId,
-            Roles = userRoles.ToArray()
+            Roles = [.. userRoles]
         };
     }
 
@@ -702,13 +646,7 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null)
-        {
-            throw new IdentityException($"User not found. ID: {userId}");
-        }
-
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new IdentityException($"User not found. ID: {userId}");
         var result = await _userManager.DeleteAsync(user);
 
         if (!result.Succeeded)
@@ -729,13 +667,7 @@ public class IdentityService : IIdentityService
 
     public async Task<LoginUserResult> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException("Invalid login credentials.");
-        }
-
+        var user = await _userManager.FindByEmailAsync(email) ?? throw new UnauthorizedAccessException("Invalid login credentials.");
         if (user.IsBlocked)
         {
             throw new UnauthorizedAccessException($"User is blocked. {email}");
@@ -789,12 +721,7 @@ public class IdentityService : IIdentityService
 
     public async Task<LogoutUserResult> LogoutAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-        {
-            throw new IdentityException($"Invalid userId: {userId}");
-        }
-
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new IdentityException($"Invalid userId: {userId}");
         var tokens = await _tokenRepository.GetByUserIdAsync(userId, cancellationToken);
         foreach (var token in tokens)
         {
@@ -803,7 +730,7 @@ public class IdentityService : IIdentityService
 
         await _unitOfWork.SaveAsync(cancellationToken);
 
-        return new LogoutUserResult { UserId = userId };
+        return new LogoutUserResult { UserId = user.Id };
     }
 
     public async Task<GenerateRefreshTokenResult> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
@@ -816,14 +743,7 @@ public class IdentityService : IIdentityService
             throw new IdentityException("Refresh token has expired, please re-login");
         }
 
-        var user = await _userManager.FindByIdAsync(token.UserId);
-
-        if (user == null)
-        {
-            throw new IdentityException("Refresh token has expired, please re-login");
-        }
-
-
+        var user = await _userManager.FindByIdAsync(token.UserId) ?? throw new IdentityException("Refresh token has expired, please re-login");
         var mainNavs = await _navigationService.GenerateMainNavAsync(user.Id, cancellationToken);
         var userClaims = await _roleClaimService.GetClaimListByUserAsync(user.Id);
         var newAccessToken = _tokenService.GenerateToken(user, userClaims);
@@ -853,13 +773,7 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var identityRole = await _roleManager.FindByNameAsync(role);
-
-        if (identityRole == null)
-        {
-            throw new IdentityException($"Role '{role}' not found.");
-        }
-
+        var identityRole = await _roleManager.FindByNameAsync(role) ?? throw new IdentityException($"Role '{role}' not found.");
         if (!RoleClaimHelper.GetPermissionClaims().Any(x => claims.Contains(x)))
         {
             throw new IdentityException($"Contain not valid claims: {string.Join("; ", claims.Select(x => x))}.");
@@ -890,13 +804,7 @@ public class IdentityService : IIdentityService
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var identityRole = await _roleManager.FindByNameAsync(role);
-
-        if (identityRole == null)
-        {
-            throw new IdentityException($"Role '{role}' not found.");
-        }
-
+        var identityRole = await _roleManager.FindByNameAsync(role) ?? throw new IdentityException($"Role '{role}' not found.");
         if (!RoleClaimHelper.GetPermissionClaims().Any(x => claims.Contains(x)))
         {
             throw new IdentityException($"Contain not valid claims: {string.Join("; ", claims.Select(x => x))}.");
@@ -1108,22 +1016,22 @@ public class IdentityService : IIdentityService
         if (sortBy.Equals("Email", StringComparison.OrdinalIgnoreCase))
         {
             users = sortDirection.Equals("asc", StringComparison.OrdinalIgnoreCase)
-                ? users.OrderBy(x => x.Email).ToList()
-                : users.OrderByDescending(x => x.Email).ToList();
+                ? [.. users.OrderBy(x => x.Email)]
+                : [.. users.OrderByDescending(x => x.Email)];
         }
 
         if (sortBy.Equals("FirstName", StringComparison.OrdinalIgnoreCase))
         {
             users = sortDirection.Equals("asc", StringComparison.OrdinalIgnoreCase)
-                ? users.OrderBy(x => x.FirstName).ToList()
-                : users.OrderByDescending(x => x.FirstName).ToList();
+                ? [.. users.OrderBy(x => x.FirstName)]
+                : [.. users.OrderByDescending(x => x.FirstName)];
         }
 
         if (sortBy.Equals("LastName", StringComparison.OrdinalIgnoreCase))
         {
             users = sortDirection.Equals("asc", StringComparison.OrdinalIgnoreCase)
-                ? users.OrderBy(x => x.LastName).ToList()
-                : users.OrderByDescending(x => x.LastName).ToList();
+                ? [.. users.OrderBy(x => x.LastName)]
+                : [.. users.OrderByDescending(x => x.LastName)];
         }
 
         await Task.CompletedTask;
@@ -1225,10 +1133,9 @@ public class IdentityService : IIdentityService
 
     public List<string> GetUserIdsByUserName(string userName)
     {
-        return _queryContext.Users
+        return [.. _queryContext.Users
             .Where(x => x.UserName!.Contains(userName))
-            .Select(x => x.Id)
-            .ToList();
+            .Select(x => x.Id)];
     }
 
     public Dictionary<string, string?> GetUsersDictionary()
@@ -1241,13 +1148,7 @@ public class IdentityService : IIdentityService
         string code,
         CancellationToken cancellationToken = default)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-
-        if (user == null)
-        {
-            throw new IdentityException($"Unable to load user with email: {email}");
-        }
-
+        var user = await _userManager.FindByEmailAsync(email) ?? throw new IdentityException($"Unable to load user with email: {email}");
         code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
         var result = await _userManager.ConfirmEmailAsync(user, code);
 
@@ -1266,17 +1167,11 @@ public class IdentityService : IIdentityService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByEmailAsync(email);
-
-        if (user == null)
-        {
-            throw new IdentityException($"Unable to load user with email: {email}");
-        }
-
+        var user = await _userManager.FindByEmailAsync(email) ?? throw new IdentityException($"Unable to load user with email: {email}");
         var code = await _userManager.GeneratePasswordResetTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-        var clearTempPassword = Guid.NewGuid().ToString().Substring(0, _identitySettings.Password.RequiredLength);
+        var clearTempPassword = Guid.NewGuid().ToString()[.._identitySettings.Password.RequiredLength];
         var tempPassword = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(clearTempPassword));
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -1296,13 +1191,7 @@ public class IdentityService : IIdentityService
         string code,
         CancellationToken cancellationToken = default)
     {
-        var user = await _userManager.FindByEmailAsync(email);
-
-        if (user == null)
-        {
-            throw new IdentityException($"Unable to load user with email: {email}");
-        }
-
+        var user = await _userManager.FindByEmailAsync(email) ?? throw new IdentityException($"Unable to load user with email: {email}");
         code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
         tempPassword = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(tempPassword));
         var result = await _userManager.ResetPasswordAsync(user, code, tempPassword);

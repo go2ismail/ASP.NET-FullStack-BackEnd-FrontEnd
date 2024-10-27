@@ -4,8 +4,11 @@
 // ----------------------------------------------------------------------------
 
 using Domain.Entities;
+
 using Infrastructure.SecurityManagers.Navigations;
+
 using Microsoft.AspNetCore.Identity;
+
 using System.Security.Claims;
 
 namespace Infrastructure.SeedManagers.Systems;

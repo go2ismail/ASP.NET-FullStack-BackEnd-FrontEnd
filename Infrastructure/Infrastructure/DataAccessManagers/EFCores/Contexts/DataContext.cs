@@ -4,20 +4,19 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.CQS;
+
 using Domain.Entities;
+
 using Infrastructure.DataAccessManagers.EFCores.Configurations;
 using Infrastructure.SecurityManagers.AspNetIdentity;
+
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.DataAccessManagers.EFCores.Contexts;
 
-public class DataContext : IdentityDbContext<ApplicationUser>, IEntityDbSet
+public class DataContext(DbContextOptions<DataContext> options) : IdentityDbContext<ApplicationUser>(options), IEntityDbSet
 {
-    public DataContext(DbContextOptions<DataContext> options) : base(options)
-    {
-    }
-
     public DbSet<Gender> Gender { get; set; }
     public DbSet<NumberSequence> NumberSequence { get; set; }
     public DbSet<Config> Config { get; set; }

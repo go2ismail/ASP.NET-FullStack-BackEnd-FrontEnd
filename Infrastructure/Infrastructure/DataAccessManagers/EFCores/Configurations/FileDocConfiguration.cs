@@ -9,6 +9,7 @@ using Domain.Entities;
 namespace Infrastructure.DataAccessManagers.EFCores.Configurations;
 
 using Infrastructure.DataAccessManagers.EFCores.Configurations.Bases;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

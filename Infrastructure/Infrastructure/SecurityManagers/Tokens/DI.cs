@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+
 using System.Text;
 
 namespace Infrastructure.SecurityManagers.Tokens;
@@ -56,10 +57,10 @@ public static class DI
                     }
                     else
                     {
-                        var authorizationHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+                        var authorizationHeader = context.Request.Headers.Authorization.FirstOrDefault();
                         if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer "))
                         {
-                            context.Token = authorizationHeader.Substring("Bearer ".Length).Trim();
+                            context.Token = authorizationHeader["Bearer ".Length..].Trim();
                         }
                     }
 

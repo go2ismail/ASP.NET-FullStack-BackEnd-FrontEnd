@@ -8,14 +8,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace WebAPI.Common.Filters;
 
-public class ClaimBasedAuthorizationAttribute : ActionFilterAttribute
+public class ClaimBasedAuthorizationAttribute(string operationName) : ActionFilterAttribute
 {
-    private readonly string _operationName;
-
-    public ClaimBasedAuthorizationAttribute(string operationName)
-    {
-        _operationName = operationName;
-    }
+    private readonly string _operationName = operationName;
 
     public override void OnActionExecuting(ActionExecutingContext context)
     {

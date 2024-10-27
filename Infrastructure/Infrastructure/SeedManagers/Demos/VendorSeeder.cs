@@ -6,33 +6,27 @@
 using Application.Services.CQS.Queries;
 using Application.Services.Externals;
 using Application.Services.Repositories;
+
 using Domain.Entities;
+
 using Microsoft.EntityFrameworkCore;
+
 using System.Text.Json;
 
-namespace Infrastructure.SeedManagers.Systems;
+namespace Infrastructure.SeedManagers.Demos;
 
-public class VendorSeeder
+public class VendorSeeder(
+    INumberSequenceService numberSequenceService,
+    IBaseCommandRepository<Vendor> vendor,
+    IBaseCommandRepository<VendorGroup> vendorGroup,
+    IBaseCommandRepository<Gender> gender,
+    IUnitOfWork unitOfWork)
 {
-    private readonly INumberSequenceService _numberSequenceService;
-    private readonly IBaseCommandRepository<Vendor> _vendor;
-    private readonly IBaseCommandRepository<VendorGroup> _vendorGroup;
-    private readonly IBaseCommandRepository<Gender> _gender;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public VendorSeeder(
-        INumberSequenceService numberSequenceService,
-        IBaseCommandRepository<Vendor> vendor,
-        IBaseCommandRepository<VendorGroup> vendorGroup,
-        IBaseCommandRepository<Gender> gender,
-        IUnitOfWork unitOfWork)
-    {
-        _numberSequenceService = numberSequenceService;
-        _vendor = vendor;
-        _vendorGroup = vendorGroup;
-        _gender = gender;
-        _unitOfWork = unitOfWork;
-    }
+    private readonly INumberSequenceService _numberSequenceService = numberSequenceService;
+    private readonly IBaseCommandRepository<Vendor> _vendor = vendor;
+    private readonly IBaseCommandRepository<VendorGroup> _vendorGroup = vendorGroup;
+    private readonly IBaseCommandRepository<Gender> _gender = gender;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task GenerateDataAsync()
     {

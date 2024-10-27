@@ -5,8 +5,10 @@
 
 using Domain.Constants;
 using Domain.Entities;
+
 using Infrastructure.DataAccessManagers.EFCores.Configurations.Bases;
 using Infrastructure.SecurityManagers.AspNetIdentity;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

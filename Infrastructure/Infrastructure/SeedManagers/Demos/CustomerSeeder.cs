@@ -6,11 +6,14 @@
 using Application.Services.CQS.Queries;
 using Application.Services.Externals;
 using Application.Services.Repositories;
+
 using Domain.Entities;
+
 using Microsoft.EntityFrameworkCore;
+
 using System.Text.Json;
 
-namespace Infrastructure.SeedManagers.Systems;
+namespace Infrastructure.SeedManagers.Demos;
 
 public class CustomerSeeder
 {

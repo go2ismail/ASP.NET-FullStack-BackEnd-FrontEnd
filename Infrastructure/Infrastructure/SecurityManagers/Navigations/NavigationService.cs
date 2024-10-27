@@ -5,8 +5,11 @@
 
 using Application.Features.NavigationManagers.Queries;
 using Application.Services.Externals;
+
 using Infrastructure.SecurityManagers.AspNetIdentity;
+
 using Microsoft.AspNetCore.Identity;
+
 using System.Security.Claims;
 
 namespace Infrastructure.SecurityManagers.Navigations;

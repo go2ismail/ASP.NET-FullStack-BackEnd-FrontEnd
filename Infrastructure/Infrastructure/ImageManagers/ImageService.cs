@@ -5,28 +5,22 @@
 
 using Application.Services.Externals;
 using Application.Services.Repositories;
+
 using Domain.Entities;
+
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.ImageManagers;
 
-public class ImageService : IImageService
+public class ImageService(
+    IUnitOfWork unitOfWork,
+    IOptions<ImageManagerSettings> settings,
+    IBaseCommandRepository<FileImage> imgRepository) : IImageService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly string _folderPath;
-    private readonly int _maxFileSizeInBytes;
-    private readonly IBaseCommandRepository<FileImage> _imgRepository;
-
-    public ImageService(
-        IUnitOfWork unitOfWork,
-        IOptions<ImageManagerSettings> settings,
-        IBaseCommandRepository<FileImage> imgRepository)
-    {
-        _unitOfWork = unitOfWork;
-        _folderPath = Path.Combine(Directory.GetCurrentDirectory(), settings.Value.PathFolder);
-        _maxFileSizeInBytes = settings.Value.MaxFileSizeInMB * 1024 * 1024;
-        _imgRepository = imgRepository;
-    }
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly string _folderPath = Path.Combine(Directory.GetCurrentDirectory(), settings.Value.PathFolder);
+    private readonly int _maxFileSizeInBytes = settings.Value.MaxFileSizeInMB * 1024 * 1024;
+    private readonly IBaseCommandRepository<FileImage> _imgRepository = imgRepository;
 
     public async Task<string> UploadAsync(
         string? userId,

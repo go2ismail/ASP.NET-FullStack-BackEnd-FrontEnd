@@ -4,11 +4,16 @@
 // ----------------------------------------------------------------------------
 
 using Application.Features.Accounts.Commands;
+
 using Domain.Constants;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using System.Security.Claims;
+
 using WebAPI.Common.Exceptions;
 using WebAPI.Common.Filters;
 using WebAPI.Common.Models;
@@ -17,13 +22,9 @@ namespace WebAPI.Controllers.Accounts;
 
 
 [Route("api/[controller]")]
-public class AccountController : BaseApiController
+public class AccountController(ISender sender, IConfiguration configuration) : BaseApiController(sender)
 {
-    private readonly IConfiguration _configuration;
-    public AccountController(ISender sender, IConfiguration configuration) : base(sender)
-    {
-        _configuration = configuration;
-    }
+    private readonly IConfiguration _configuration = configuration;
 
     [ClaimBasedAuthorization("Create")]
     [HttpPost("CreateUser")]
@@ -85,16 +86,10 @@ public class AccountController : BaseApiController
     [HttpPost("Login")]
     public async Task<ActionResult<ApiSuccessResult<LoginUserResult>>> LoginAsync(LoginUserRequest request, CancellationToken cancellationToken)
     {
-        var response = await _sender.Send(request, cancellationToken);
-
-        if (response == null)
-        {
-            throw new ApiException(
+        var response = await _sender.Send(request, cancellationToken) ?? throw new ApiException(
                 StatusCodes.Status401Unauthorized,
                 "Invalid or expired token"
                 );
-        }
-
         var accessToken = response.AccessToken;
         var refreshToken = response.RefreshToken;
 
@@ -119,8 +114,7 @@ public class AccountController : BaseApiController
             var accessTokenCookieName = _configuration["Jwt:accessTokenCookieName"];
             var refreshTokenCookieName = _configuration["Jwt:refreshTokenCookieName"];
 
-            double expireInMinute;
-            if (!double.TryParse(_configuration["Jwt:ExpireInMinute"], out expireInMinute))
+            if (!double.TryParse(_configuration["Jwt:ExpireInMinute"], out double expireInMinute))
             {
                 expireInMinute = 15.0;
             }

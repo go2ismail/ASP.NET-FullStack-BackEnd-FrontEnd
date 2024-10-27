@@ -25,8 +25,7 @@ public static class DocumentManagerHelper
 
         extension = extension.ToLowerInvariant();
 
-        return MimeTypes.ContainsKey(extension)
-            ? MimeTypes[extension]
-            : "application/octet-stream";
+        return MimeTypes.TryGetValue(extension, out string? value)
+            ? value : "application/octet-stream";
     }
 }

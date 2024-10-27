@@ -19,8 +19,8 @@ public static class ListExtensions
         var ascending = !orderBy.EndsWith(" desc", StringComparison.OrdinalIgnoreCase);
 
         return ascending
-            ? source.OrderBy(x => GetPropertyValue(x!, propertyName)).ToList()
-            : source.OrderByDescending(x => GetPropertyValue(x!, propertyName)).ToList();
+            ? [.. source.OrderBy(x => GetPropertyValue(x!, propertyName))]
+            : [.. source.OrderByDescending(x => GetPropertyValue(x!, propertyName))];
     }
 
     public static List<T> ApplyPaging<T>(this List<T> source, int skip, int take)
@@ -28,14 +28,12 @@ public static class ListExtensions
         return source.Skip(skip).Take(take).ToList();
     }
 
-    private static object GetPropertyValue(object obj, string propertyName)
+    private static object? GetPropertyValue(object obj, string propertyName)
     {
         var propertyInfo = obj.GetType().GetProperty(propertyName);
-        if (propertyInfo == null)
-        {
-            throw new ApplicationException($"Property '{propertyName}' not found on {obj.GetType().Name}");
-        }
-        return propertyInfo.GetValue(obj)!;
+        return propertyInfo == null
+            ? throw new ApplicationException($"Property '{propertyName}' not found on {obj.GetType().Name}")
+            : propertyInfo.GetValue(obj);
     }
 }
 

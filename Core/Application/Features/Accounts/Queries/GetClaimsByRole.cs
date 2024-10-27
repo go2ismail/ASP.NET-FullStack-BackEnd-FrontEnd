@@ -5,7 +5,9 @@
 
 using Application.Common.Models;
 using Application.Services.Externals;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Accounts.Queries;

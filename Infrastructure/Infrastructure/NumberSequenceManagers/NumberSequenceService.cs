@@ -6,23 +6,18 @@
 using Application.Services.CQS.Queries;
 using Application.Services.Externals;
 using Application.Services.Repositories;
+
 using Domain.Entities;
 
 namespace Infrastructure.NumberSequenceManagers;
 
-public class NumberSequenceService : INumberSequenceService
+public class NumberSequenceService(
+    IUnitOfWork unitOfWork,
+    IBaseCommandRepository<NumberSequence> numberSequenceRepository) : INumberSequenceService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IBaseCommandRepository<NumberSequence> _numberSequenceRepository;
-    private readonly object _lockObject = new object();
-
-    public NumberSequenceService(
-        IUnitOfWork unitOfWork,
-        IBaseCommandRepository<NumberSequence> numberSequenceRepository)
-    {
-        _unitOfWork = unitOfWork;
-        _numberSequenceRepository = numberSequenceRepository;
-    }
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IBaseCommandRepository<NumberSequence> _numberSequenceRepository = numberSequenceRepository;
+    private readonly object _lockObject = new();
 
     private NumberSequence? GetNumberSequence(
         string entityName,
@@ -39,9 +34,6 @@ public class NumberSequenceService : INumberSequenceService
 
         return query.FirstOrDefault();
     }
-
-
-
 
     private void UpdateNumberSequence(
         string? userId,
@@ -79,7 +71,6 @@ public class NumberSequenceService : INumberSequenceService
         bool useDate = true,
         int padding = 4)
     {
-
         var result = string.Empty;
 
         if (string.IsNullOrEmpty(entityName))
@@ -89,7 +80,6 @@ public class NumberSequenceService : INumberSequenceService
 
         lock (_lockObject)
         {
-
             NumberSequence? sequence = GetNumberSequence(
                 entityName,
                 prefix,

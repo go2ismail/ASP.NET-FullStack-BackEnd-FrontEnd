@@ -4,9 +4,12 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.Repositories;
+
 using Domain.Constants;
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.CustomerGroups.Commands;

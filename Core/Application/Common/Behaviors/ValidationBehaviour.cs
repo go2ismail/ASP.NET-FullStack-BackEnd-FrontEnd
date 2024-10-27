@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Common.Behaviors;

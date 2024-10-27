@@ -5,12 +5,17 @@
 
 using Application.Features.CustomerGroups.Commands;
 using Application.Features.CustomerGroups.Queries;
+
 using Domain.Entities;
+
 using Infrastructure.DataAccessManagers.EFCores.ODatas;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+
 using WebAPI.Common.Filters;
 using WebAPI.Common.Models;
 

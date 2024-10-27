@@ -5,23 +5,15 @@
 
 namespace WebAPI.Common.Models;
 
-public class Error
+public class Error(
+    string? innerException,
+    string? source,
+    string? stackTrace,
+    string? exceptionType)
 {
-    public Error(
-        string? innerException,
-        string? source,
-        string? stackTrace,
-        string? exceptionType)
-    {
-        Ref = "https://datatracker.ietf.org/doc/html/rfc9110";
-        InnerException = innerException;
-        Source = source?.Trim();
-        StackTrace = stackTrace?.Trim();
-        ExceptionType = exceptionType;
-    }
-    public string Ref { get; set; }
-    public string? ExceptionType { get; init; }
-    public string? InnerException { get; init; }
-    public string? Source { get; init; }
-    public string? StackTrace { get; init; }
+    public string Ref { get; set; } = "https://datatracker.ietf.org/doc/html/rfc9110";
+    public string? ExceptionType { get; init; } = exceptionType;
+    public string? InnerException { get; init; } = innerException;
+    public string? Source { get; init; } = source?.Trim();
+    public string? StackTrace { get; init; } = stackTrace?.Trim();
 }

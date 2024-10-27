@@ -4,25 +4,22 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.Externals;
+
 using Infrastructure.SecurityManagers.AspNetIdentity;
+
 using Microsoft.AspNetCore.Identity;
+
 using System.Security.Claims;
 
 namespace Infrastructure.SecurityManagers.RoleClaims;
 
-public class RoleClaimService : IRoleClaimService
+public class RoleClaimService(
+    UserManager<ApplicationUser> userManager,
+    RoleManager<IdentityRole> roleManager
+        ) : IRoleClaimService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-
-    public RoleClaimService(
-        UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager
-        )
-    {
-        _userManager = userManager;
-        _roleManager = roleManager;
-    }
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly RoleManager<IdentityRole> _roleManager = roleManager;
 
     public async Task<List<Claim>> GetClaimListByUserAsync(
         string userId,
@@ -30,14 +27,8 @@ public class RoleClaimService : IRoleClaimService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null)
-        {
-            throw new RoleClaimException($"User not found. ID: {userId}");
-        }
-
-        List<Claim> userClaims = (await _userManager.GetClaimsAsync(user)).ToList();
+        var user = await _userManager.FindByIdAsync(userId) ?? throw new RoleClaimException($"User not found. ID: {userId}");
+        List<Claim> userClaims = [.. (await _userManager.GetClaimsAsync(user))];
 
         var roles = await _userManager.GetRolesAsync(user);
         var roleClaims = new List<Claim>();
@@ -66,7 +57,7 @@ public class RoleClaimService : IRoleClaimService
         cancellationToken.ThrowIfCancellationRequested();
 
         var users = _userManager.Users.ToList();
-        List<Claim> claims = new List<Claim>();
+        var claims = new List<Claim>();
         foreach (var user in users)
         {
             var userClaims = (await _userManager.GetClaimsAsync(user)).ToList();

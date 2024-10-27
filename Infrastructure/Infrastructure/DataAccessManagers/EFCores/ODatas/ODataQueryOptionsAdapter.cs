@@ -4,19 +4,16 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.CQS.Queries;
+
 using Infrastructure.DataAccessManagers.EFCores.Exceptions;
+
 using Microsoft.AspNetCore.OData.Query;
 
 namespace Infrastructure.DataAccessManagers.EFCores.ODatas;
 
-public class ODataQueryOptionsAdapter<T> : IODataQueryOptions<T>
+public class ODataQueryOptionsAdapter<T>(ODataQueryOptions<T> odataQueryOptions) : IODataQueryOptions<T>
 {
-    private readonly ODataQueryOptions<T> _odataQueryOptions;
-
-    public ODataQueryOptionsAdapter(ODataQueryOptions<T> odataQueryOptions)
-    {
-        _odataQueryOptions = odataQueryOptions;
-    }
+    private readonly ODataQueryOptions<T> _odataQueryOptions = odataQueryOptions;
 
     public IQueryable<T> ApplyOData(IQueryable<T> query)
     {
@@ -97,8 +94,4 @@ public class ODataQueryOptionsAdapter<T> : IODataQueryOptions<T>
 
         return query;
     }
-
 }
-
-
-

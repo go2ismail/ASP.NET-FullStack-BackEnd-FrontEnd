@@ -4,9 +4,12 @@
 // ----------------------------------------------------------------------------
 
 using Application.Features.NavigationManagers.Queries;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using WebAPI.Common.Exceptions;
 using WebAPI.Common.Models;
 

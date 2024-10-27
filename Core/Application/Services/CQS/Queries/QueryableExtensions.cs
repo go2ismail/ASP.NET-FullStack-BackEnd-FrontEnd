@@ -4,7 +4,9 @@
 // ----------------------------------------------------------------------------
 
 using Domain.Interfaces;
+
 using Microsoft.EntityFrameworkCore;
+
 using System.Linq.Expressions;
 
 namespace Application.Services.CQS.Queries;
@@ -21,8 +23,6 @@ public static class QueryableExtensions
         return query;
     }
 
-
-
     public static IQueryable<T> ApplyODataFilterWithPaging<T>(
         this IQueryable<T> query,
         IODataQueryOptions<T> queryOptions,
@@ -31,7 +31,6 @@ public static class QueryableExtensions
         out int top
     ) where T : class
     {
-
         totalRecords = queryOptions.GetTotalRecords(query);
 
         query = queryOptions.ApplyOData(query);
@@ -107,17 +106,10 @@ public static class QueryableExtensions
         // Build the predicate dynamically
         var parameter = Expression.Parameter(typeof(T), "x");
         var navigationProperty = Expression.Property(parameter, navigationPropertyName);
-        var containsMethod = typeof(List<string>).GetMethod("Contains", new[] { typeof(string) });
-        if (containsMethod == null)
-        {
-            throw new ApplicationException($"Method 'Contains' not found on List<string>");
-        }
+        var containsMethod = typeof(List<string>).GetMethod("Contains", [typeof(string)]) ?? throw new ApplicationException($"Method 'Contains' not found on List<string>");
         var containsExpression = Expression.Call(Expression.Constant(ids), containsMethod, navigationProperty);
         var lambda = Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
 
         return query.Where(lambda);
     }
-
-
 }
-

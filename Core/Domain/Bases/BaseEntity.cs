@@ -26,8 +26,8 @@ public abstract class BaseEntity : IHasSequentialId
     {
         byte[] guidArray = Guid.NewGuid().ToByteArray();
 
-        DateTime baseDate = new DateTime(1900, 1, 1);
-        DateTime now = DateTime.UtcNow;
+        var baseDate = new DateTime(1900, 1, 1);
+        var now = DateTime.UtcNow;
 
         TimeSpan timeSpan = now - baseDate;
         byte[] daysArray = BitConverter.GetBytes(timeSpan.Days);

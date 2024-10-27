@@ -5,24 +5,25 @@
 
 using Application.Features.CustomerSubGroups.Commands;
 using Application.Features.CustomerSubGroups.Queries;
+
 using Domain.Entities;
+
 using Infrastructure.DataAccessManagers.EFCores.ODatas;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+
 using WebAPI.Common.Filters;
 using WebAPI.Common.Models;
 
 namespace WebAPI.Controllers.CustomerSubGroups;
 
 [Route("api/[controller]")]
-public class CustomerSubGroupController : BaseApiController
+public class CustomerSubGroupController(ISender sender) : BaseApiController(sender)
 {
-    public CustomerSubGroupController(ISender sender) : base(sender)
-    {
-    }
-
     [ClaimBasedAuthorization("Create")]
     [HttpPost("CreateCustomerSubGroup")]
     public async Task<ActionResult<ApiSuccessResult<CreateCustomerSubGroupResult>>> CreateCustomerSubGroupAsync(CreateCustomerSubGroupRequest request, CancellationToken cancellationToken)

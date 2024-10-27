@@ -4,7 +4,9 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.Externals;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Accounts.Commands;
@@ -40,14 +42,9 @@ public class UpdateRoleValidator : AbstractValidator<UpdateRoleRequest>
 }
 
 
-public class UpdateRoleHandler : IRequestHandler<UpdateRoleRequest, UpdateRoleResult>
+public class UpdateRoleHandler(IIdentityService identityService) : IRequestHandler<UpdateRoleRequest, UpdateRoleResult>
 {
-    private readonly IIdentityService _identityService;
-
-    public UpdateRoleHandler(IIdentityService identityService)
-    {
-        _identityService = identityService;
-    }
+    private readonly IIdentityService _identityService = identityService;
 
     public async Task<UpdateRoleResult> Handle(UpdateRoleRequest request, CancellationToken cancellationToken)
     {

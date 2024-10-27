@@ -4,9 +4,12 @@
 // ----------------------------------------------------------------------------
 using Application.Services.CQS.Queries;
 using Application.Services.Repositories;
+
 using Domain.Bases;
 using Domain.Interfaces;
+
 using Infrastructure.DataAccessManagers.EFCores.Contexts;
+
 using Microsoft.EntityFrameworkCore;
 
 

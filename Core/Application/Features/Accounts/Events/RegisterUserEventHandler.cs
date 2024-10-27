@@ -4,7 +4,9 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.Externals;
+
 using MediatR;
+
 using System.Text.Encodings.Web;
 
 namespace Application.Features.Accounts.Events;

@@ -5,7 +5,9 @@
 
 using Application.Features.NavigationManagers.Queries;
 using Application.Services.Externals;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Accounts.Commands;
@@ -40,14 +42,9 @@ public class LoginUserValidator : AbstractValidator<LoginUserRequest>
     }
 }
 
-public class LoginUserHandler : IRequestHandler<LoginUserRequest, LoginUserResult>
+public class LoginUserHandler(IIdentityService identityService) : IRequestHandler<LoginUserRequest, LoginUserResult>
 {
-    private readonly IIdentityService _identityService;
-
-    public LoginUserHandler(IIdentityService identityService)
-    {
-        _identityService = identityService;
-    }
+    private readonly IIdentityService _identityService = identityService;
 
     public async Task<LoginUserResult> Handle(LoginUserRequest request, CancellationToken cancellationToken)
     {

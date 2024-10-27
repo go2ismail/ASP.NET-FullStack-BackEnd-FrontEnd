@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 using Domain.Entities;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services.CQS;

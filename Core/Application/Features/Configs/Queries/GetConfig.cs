@@ -4,11 +4,16 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.CQS.Queries;
+
 using AutoMapper;
+
 using Domain.Constants;
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Configs.Queries;
@@ -57,19 +62,13 @@ public class GetConfigValidator : AbstractValidator<GetConfigRequest>
 }
 
 
-public class GetConfigHandler : IRequestHandler<GetConfigRequest, GetConfigResult>
+public class GetConfigHandler(
+    IQueryContext context,
+    IMapper mapper
+        ) : IRequestHandler<GetConfigRequest, GetConfigResult>
 {
-    private readonly IQueryContext _context;
-    private readonly IMapper _mapper;
-
-    public GetConfigHandler(
-        IQueryContext context,
-        IMapper mapper
-        )
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IQueryContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<GetConfigResult> Handle(GetConfigRequest request, CancellationToken cancellationToken = default)
     {
@@ -84,13 +83,7 @@ public class GetConfigHandler : IRequestHandler<GetConfigRequest, GetConfigResul
                 config,
                 CurrencyName = currency != null ? currency.Name : null
             }
-            ).SingleOrDefaultAsync(cancellationToken);
-
-        if (entity == null)
-        {
-            throw new ApplicationException($"{ExceptionConsts.EntitiyNotFound} {request.Id}");
-        }
-
+            ).SingleOrDefaultAsync(cancellationToken) ?? throw new ApplicationException($"{ExceptionConsts.EntitiyNotFound} {request.Id}");
         var dto = _mapper.Map<GetConfigDto>(entity.config);
 
         dto = dto with

@@ -5,18 +5,14 @@
 
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
+
 using System.Security.Authentication;
 
 namespace WebAPI.Common.Middlewares;
 
-public class GlobalExceptionHandlerMiddleware
+public class GlobalExceptionHandlerMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public GlobalExceptionHandlerMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
+    private readonly RequestDelegate _next = next;
 
     public async Task InvokeAsync(HttpContext httpContext, IExceptionHandler customExceptionHandler)
     {

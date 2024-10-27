@@ -4,18 +4,14 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.Repositories;
+
 using Infrastructure.DataAccessManagers.EFCores.Contexts;
 
 namespace Infrastructure.DataAccessManagers.EFCores.Repositories;
 
-public class UnitOfWork : IUnitOfWork
+public class UnitOfWork(CommandContext context) : IUnitOfWork
 {
-    private readonly CommandContext _context;
-
-    public UnitOfWork(CommandContext context)
-    {
-        _context = context;
-    }
+    private readonly CommandContext _context = context;
 
     public async Task SaveAsync(CancellationToken cancellationToken = default)
     {

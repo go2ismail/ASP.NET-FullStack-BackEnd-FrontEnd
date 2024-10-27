@@ -5,9 +5,13 @@
 
 using Application.Common.Models;
 using Application.Services.Externals;
+
 using AutoMapper;
+
 using Domain.Constants;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Accounts.Queries;

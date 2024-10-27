@@ -5,8 +5,11 @@
 
 using Application.Features.Accounts.Queries;
 using Application.Features.Members.Commands;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Mvc;
+
 using WebAPI.Common.Filters;
 using WebAPI.Common.Models;
 
@@ -14,14 +17,9 @@ namespace WebAPI.Controllers.UserProfiles;
 
 
 [Route("api/[controller]")]
-public class UserProfileController : BaseApiController
+public class UserProfileController(ISender sender, IConfiguration configuration) : BaseApiController(sender)
 {
-    private readonly IConfiguration _configuration;
-    public UserProfileController(ISender sender, IConfiguration configuration) : base(sender)
-    {
-        _configuration = configuration;
-    }
-
+    private readonly IConfiguration _configuration = configuration;
 
     [ClaimBasedAuthorization("Read")]
     [HttpGet("GetUsersByUserId")]

@@ -4,9 +4,12 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.Repositories;
+
 using Domain.Constants;
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Configs.Commands;
@@ -34,29 +37,17 @@ public class DeleteConfigValidator : AbstractValidator<DeleteConfigRequest>
 }
 
 
-public class DeleteConfigHandler : IRequestHandler<DeleteConfigRequest, DeleteConfigResult>
+public class DeleteConfigHandler(
+    IBaseCommandRepository<Config> repository,
+    IUnitOfWork unitOfWork
+        ) : IRequestHandler<DeleteConfigRequest, DeleteConfigResult>
 {
-    private readonly IBaseCommandRepository<Config> _repository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public DeleteConfigHandler(
-        IBaseCommandRepository<Config> repository,
-        IUnitOfWork unitOfWork
-        )
-    {
-        _repository = repository;
-        _unitOfWork = unitOfWork;
-    }
+    private readonly IBaseCommandRepository<Config> _repository = repository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<DeleteConfigResult> Handle(DeleteConfigRequest request, CancellationToken cancellationToken = default)
     {
-        var entity = await _repository.GetAsync(request.Id, cancellationToken);
-
-        if (entity == null)
-        {
-            throw new ApplicationException($"{ExceptionConsts.EntitiyNotFound} {request.Id}");
-        }
-
+        var entity = await _repository.GetAsync(request.Id, cancellationToken) ?? throw new ApplicationException($"{ExceptionConsts.EntitiyNotFound} {request.Id}");
         entity.Delete(request.UserId);
         _repository.Delete(entity);
         await _unitOfWork.SaveAsync(cancellationToken);

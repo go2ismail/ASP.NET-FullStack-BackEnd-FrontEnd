@@ -32,11 +32,11 @@ public abstract class BaseEntityAudit : BaseEntity, IHasIsDeleted
         IsDeleted = true;
         return this;
     }
+
     public BaseEntityAudit SetAudit(string? userId)
     {
         UpdatedAt = DateTime.UtcNow;
         UpdatedById = userId?.Trim();
         return this;
     }
-
 }

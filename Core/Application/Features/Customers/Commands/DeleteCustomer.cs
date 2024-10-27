@@ -5,10 +5,14 @@
 
 using Application.Services.CQS.Queries;
 using Application.Services.Repositories;
+
 using Domain.Constants;
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Customers.Commands;

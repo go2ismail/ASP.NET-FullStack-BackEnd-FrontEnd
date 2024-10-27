@@ -16,7 +16,6 @@ public class Token : BaseEntity, IAggregateRoot
     public string RefreshToken { get; set; } = null!;
     public DateTimeOffset ExpiryDate { get; set; }
 
-
     public Token() : base() { } //for EF Core
     public Token(
         string userId,

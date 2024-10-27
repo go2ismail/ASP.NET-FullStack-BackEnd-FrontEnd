@@ -4,12 +4,18 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.CQS.Queries;
+
 using AutoMapper;
+
 using Domain.Constants;
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
+
 using Microsoft.EntityFrameworkCore;
+
 using System.Collections.ObjectModel;
 
 namespace Application.Features.Customers.Queries;
@@ -63,19 +69,13 @@ public class GetCustomerValidator : AbstractValidator<GetCustomerRequest>
 }
 
 
-public class GetCustomerHandler : IRequestHandler<GetCustomerRequest, GetCustomerResult>
+public class GetCustomerHandler(
+    IQueryContext context,
+    IMapper mapper
+        ) : IRequestHandler<GetCustomerRequest, GetCustomerResult>
 {
-    private readonly IQueryContext _context;
-    private readonly IMapper _mapper;
-
-    public GetCustomerHandler(
-        IQueryContext context,
-        IMapper mapper
-        )
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IQueryContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<GetCustomerResult> Handle(GetCustomerRequest request, CancellationToken cancellationToken)
     {

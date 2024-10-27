@@ -5,21 +5,19 @@
 
 using Application.Services.CQS.Queries;
 using Application.Services.Externals;
+
 using MailKit.Net.Smtp;
+
 using Microsoft.EntityFrameworkCore;
+
 using MimeKit;
 
 namespace Infrastructure.EmailManagers;
 
-public class EmailService : IEmailService
+public class EmailService(IQueryContext context, IEncryptionService encryptionService) : IEmailService
 {
-    private readonly IQueryContext _context;
-    private readonly IEncryptionService _encryptionService;
-    public EmailService(IQueryContext context, IEncryptionService encryptionService)
-    {
-        _context = context;
-        _encryptionService = encryptionService;
-    }
+    private readonly IQueryContext _context = context;
+    private readonly IEncryptionService _encryptionService = encryptionService;
 
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
@@ -49,7 +47,6 @@ public class EmailService : IEmailService
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
             }
-
         }
     }
 }

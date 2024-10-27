@@ -6,8 +6,11 @@
 using Application.Services.CQS.Queries;
 using Application.Services.Externals;
 using Application.Services.Repositories;
+
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Configs.Commands;
@@ -60,22 +63,15 @@ public class CreateConfigValidator : AbstractValidator<CreateConfigRequest>
 }
 
 
-public class CreateConfigHandler : IRequestHandler<CreateConfigRequest, CreateConfigResult>
+public class CreateConfigHandler(
+    IBaseCommandRepository<Config> repository,
+    IUnitOfWork unitOfWork,
+    IEncryptionService encryptionService
+        ) : IRequestHandler<CreateConfigRequest, CreateConfigResult>
 {
-    private readonly IBaseCommandRepository<Config> _repository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IEncryptionService _encryptionService;
-
-    public CreateConfigHandler(
-        IBaseCommandRepository<Config> repository,
-        IUnitOfWork unitOfWork,
-        IEncryptionService encryptionService
-        )
-    {
-        _repository = repository;
-        _unitOfWork = unitOfWork;
-        _encryptionService = encryptionService;
-    }
+    private readonly IBaseCommandRepository<Config> _repository = repository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IEncryptionService _encryptionService = encryptionService;
 
     public async Task<CreateConfigResult> Handle(CreateConfigRequest request, CancellationToken cancellationToken = default)
     {

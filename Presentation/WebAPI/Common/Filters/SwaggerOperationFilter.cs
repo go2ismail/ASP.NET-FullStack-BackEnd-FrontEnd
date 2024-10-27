@@ -5,6 +5,7 @@
 
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.OpenApi.Models;
+
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WebAPI.Common.Filters;

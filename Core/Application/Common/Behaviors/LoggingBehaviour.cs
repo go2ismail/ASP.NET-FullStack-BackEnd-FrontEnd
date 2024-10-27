@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 using MediatR;
+
 using Microsoft.Extensions.Logging;
 
 namespace Application.Common.Behaviors;

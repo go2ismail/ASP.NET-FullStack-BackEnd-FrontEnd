@@ -5,7 +5,9 @@
 
 using Application.Features.NavigationManagers.Queries;
 using Application.Services.Externals;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Accounts.Commands;

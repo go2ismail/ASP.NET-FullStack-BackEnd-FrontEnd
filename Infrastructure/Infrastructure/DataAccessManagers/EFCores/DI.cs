@@ -6,15 +6,20 @@
 using Application.Services.CQS.Commands;
 using Application.Services.CQS.Queries;
 using Application.Services.Repositories;
+
 using Domain.Invariants;
+
 using Infrastructure.DataAccessManagers.EFCores.Contexts;
 using Infrastructure.DataAccessManagers.EFCores.Repositories;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using Serilog;
+
 using System.Reflection;
 
 namespace Infrastructure.DataAccessManagers.EFCores;
@@ -86,7 +91,6 @@ public static class DI
                 break;
         }
 
-
         services.AddScoped<ICommandContext, CommandContext>();
         services.AddScoped<IQueryContext, QueryContext>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -120,7 +124,9 @@ public static class DI
 
         // Create database using DataContext
         var dataContext = serviceProvider.GetRequiredService<DataContext>();
+        dataContext.Database.EnsureDeletedAsync().Wait();
         dataContext.Database.EnsureCreated(); // Ensure database is created (development only)
+        //dataContext.Database.Migrate(); // Ensure database is created via migration (production friendly)
 
         return host;
     }

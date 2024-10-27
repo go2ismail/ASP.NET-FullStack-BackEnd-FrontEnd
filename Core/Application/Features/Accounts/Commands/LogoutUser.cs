@@ -4,7 +4,9 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.Externals;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Accounts.Commands;
@@ -27,14 +29,9 @@ public class LogoutUserValidator : AbstractValidator<LogoutUserResult>
             .NotEmpty();
     }
 }
-public class LogoutUserHandler : IRequestHandler<LogoutUserRequest, LogoutUserResult>
+public class LogoutUserHandler(IIdentityService identityService) : IRequestHandler<LogoutUserRequest, LogoutUserResult>
 {
-    private readonly IIdentityService _identityService;
-
-    public LogoutUserHandler(IIdentityService identityService)
-    {
-        _identityService = identityService;
-    }
+    private readonly IIdentityService _identityService = identityService;
 
     public async Task<LogoutUserResult> Handle(LogoutUserRequest request, CancellationToken cancellationToken)
     {

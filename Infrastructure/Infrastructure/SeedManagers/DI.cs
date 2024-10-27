@@ -6,6 +6,7 @@
 using Infrastructure.DataAccessManagers.EFCores.Contexts;
 using Infrastructure.SeedManagers.Demos;
 using Infrastructure.SeedManagers.Systems;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,9 +37,8 @@ public static class DI
         var serviceProvider = scope.ServiceProvider;
 
         var context = serviceProvider.GetRequiredService<DataContext>();
-        if (!context.Config.Any()) //if empty, thats mean never been seeded before
+        if (!context.Config.Any()) //if empty, that's mean never been seeded before
         {
-
             var roleClaimSeeder = serviceProvider.GetRequiredService<RoleClaimSeeder>();
             roleClaimSeeder.GenerateDataAsync().Wait();
 
@@ -65,10 +65,7 @@ public static class DI
         return host;
     }
 
-
-
     //>>> Demo Seed
-
     public static IServiceCollection RegisterDemoSeedManager(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<UserSeeder>();
@@ -77,13 +74,14 @@ public static class DI
 
         return services;
     }
+
     public static IHost SeedDemoData(this IHost host)
     {
         using var scope = host.Services.CreateScope();
         var serviceProvider = scope.ServiceProvider;
 
         var context = serviceProvider.GetRequiredService<DataContext>();
-        if (!context.Customer.Any()) //if empty, thats mean never been seeded before
+        if (!context.Customer.Any()) //if empty, that's mean never been seeded before
         {
             var userSeeder = serviceProvider.GetRequiredService<UserSeeder>();
             userSeeder.GenerateDataAsync().Wait();
@@ -93,7 +91,6 @@ public static class DI
 
             var vendorSeeder = serviceProvider.GetRequiredService<VendorSeeder>();
             vendorSeeder.GenerateDataAsync().Wait();
-
         }
 
         return host;

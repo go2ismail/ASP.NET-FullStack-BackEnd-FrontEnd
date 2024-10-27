@@ -5,10 +5,15 @@
 
 using Application.Common.Models;
 using Application.Services.CQS.Queries;
+
 using AutoMapper;
+
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Configs.Queries;
@@ -61,16 +66,10 @@ public class GetPagedConfigValidator : AbstractValidator<GetPagedConfigRequest>
 
 
 
-public class GetPagedConfigHandler : IRequestHandler<GetPagedConfigRequest, GetPagedConfigResult>
+public class GetPagedConfigHandler(IMapper mapper, IQueryContext context) : IRequestHandler<GetPagedConfigRequest, GetPagedConfigResult>
 {
-    private readonly IMapper _mapper;
-    private readonly IQueryContext _context;
-
-    public GetPagedConfigHandler(IMapper mapper, IQueryContext context)
-    {
-        _mapper = mapper;
-        _context = context;
-    }
+    private readonly IMapper _mapper = mapper;
+    private readonly IQueryContext _context = context;
 
     public async Task<GetPagedConfigResult> Handle(GetPagedConfigRequest request, CancellationToken cancellationToken)
     {
@@ -93,7 +92,7 @@ public class GetPagedConfigHandler : IRequestHandler<GetPagedConfigRequest, GetP
 
         int totalRecords = 0;
         string keywords = request.SearchValue;
-        bool useDBSortingPaging = !string.IsNullOrEmpty(orderby) && orderby.Contains(".") ? false : true; //dot meaning: relation property: entityName.propertyName
+        bool useDBSortingPaging = string.IsNullOrEmpty(orderby) || !orderby.Contains('.'); //dot meaning: relation property: entityName.propertyName
 
         var baseQuery = _context.Config
             .AsNoTracking()
@@ -131,7 +130,7 @@ public class GetPagedConfigHandler : IRequestHandler<GetPagedConfigRequest, GetP
             select new
             {
                 config,
-                CurrencyName = currency != null ? currency.Name : null
+                CurrencyName = !string.IsNullOrWhiteSpace(currency.Name) ? currency.Name : string.Empty
             }
         ).ToListAsync(cancellationToken);
 

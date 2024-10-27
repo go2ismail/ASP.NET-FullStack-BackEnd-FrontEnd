@@ -5,9 +5,12 @@
 
 using Application.Features.Accounts.Commands;
 using Application.Features.Accounts.Queries;
+
 using global::WebAPI.Common.Filters;
 using global::WebAPI.Common.Models;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,10 +18,8 @@ namespace WebAPI.Controllers.Claims;
 
 
 [Route("api/[controller]")]
-public class ClaimController : BaseApiController
+public class ClaimController(ISender sender) : BaseApiController(sender)
 {
-    public ClaimController(ISender sender) : base(sender) { }
-
     [ClaimBasedAuthorization("Update")]
     [HttpPost("AddClaimsToRole")]
     public async Task<ActionResult<ApiSuccessResult<AddClaimsToRoleResult>>> AddClaimsToRoleAsync(AddClaimsToRoleRequest request, CancellationToken cancellationToken)

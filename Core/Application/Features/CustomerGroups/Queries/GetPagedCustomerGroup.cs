@@ -5,11 +5,17 @@
 
 using Application.Common.Models;
 using Application.Services.CQS.Queries;
+
 using AutoMapper;
+
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
+
 using Microsoft.EntityFrameworkCore;
+
 using System.Collections.ObjectModel;
 
 namespace Application.Features.CustomerGroups.Queries;

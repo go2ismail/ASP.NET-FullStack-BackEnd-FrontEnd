@@ -5,29 +5,23 @@
 
 using Application.Services.Externals;
 using Application.Services.Repositories;
+
 using Domain.Entities;
+
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.DocumentManagers;
 
-public class DocumentService : IDocumentService
+public class DocumentService(
+    IUnitOfWork unitOfWork,
+    IOptions<DocumentManagerSettings> settings,
+    IBaseCommandRepository<FileDoc> docRepository
+        ) : IDocumentService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly string _folderPath;
-    private readonly int _maxFileSizeInBytes;
-    private readonly IBaseCommandRepository<FileDoc> _docRepository;
-
-    public DocumentService(
-        IUnitOfWork unitOfWork,
-        IOptions<DocumentManagerSettings> settings,
-        IBaseCommandRepository<FileDoc> docRepository
-        )
-    {
-        _unitOfWork = unitOfWork;
-        _folderPath = Path.Combine(Directory.GetCurrentDirectory(), settings.Value.PathFolder);
-        _maxFileSizeInBytes = settings.Value.MaxFileSizeInMB * 1024 * 1024;
-        _docRepository = docRepository;
-    }
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly string _folderPath = Path.Combine(Directory.GetCurrentDirectory(), settings.Value.PathFolder);
+    private readonly int _maxFileSizeInBytes = settings.Value.MaxFileSizeInMB * 1024 * 1024;
+    private readonly IBaseCommandRepository<FileDoc> _docRepository = docRepository;
 
     public async Task<string> UploadAsync(
         string? userId,
@@ -92,5 +86,4 @@ public class DocumentService : IDocumentService
 
         return result;
     }
-
 }

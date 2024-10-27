@@ -4,12 +4,15 @@
 // ----------------------------------------------------------------------------
 
 using Application;
+
 using Infrastructure;
 using Infrastructure.DataAccessManagers.EFCores;
 using Infrastructure.SeedManagers;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData;
 using Microsoft.OpenApi.Models;
+
 using WebAPI.Common.Filters;
 using WebAPI.Common.Handlers;
 using WebAPI.Common.Middlewares;
@@ -88,7 +91,7 @@ builder.Services.AddSwaggerGen(c =>
                         Id = "Bearer"
                     }
                 },
-                new string[] { }
+                Array.Empty<string>()
             }
         });
 
@@ -107,7 +110,7 @@ builder.Services.RegisterDemoSeedManager(builder.Configuration);
 
 var app = builder.Build();
 
-//craete database
+//create database
 app.CreateDatabase();
 
 //seed database with system data
@@ -160,4 +163,4 @@ if (app.Environment.IsDevelopment())
 }
 
 
-app.Run();
+await app.RunAsync();

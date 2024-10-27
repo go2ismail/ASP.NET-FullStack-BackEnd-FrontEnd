@@ -5,24 +5,25 @@
 
 using Application.Features.Genders.Commands;
 using Application.Features.Genders.Queries;
+
 using Domain.Entities;
+
 using Infrastructure.DataAccessManagers.EFCores.ODatas;
+
 using MediatR;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
+
 using WebAPI.Common.Filters;
 using WebAPI.Common.Models;
 
 namespace WebAPI.Controllers.Genders;
 
 [Route("api/[controller]")]
-public class GenderController : BaseApiController
+public class GenderController(ISender sender) : BaseApiController(sender)
 {
-    public GenderController(ISender sender) : base(sender)
-    {
-    }
-
     [ClaimBasedAuthorization("Create")]
     [HttpPost("CreateGender")]
     public async Task<ActionResult<ApiSuccessResult<CreateGenderResult>>> CreateGenderAsync(CreateGenderRequest request, CancellationToken cancellationToken)
@@ -118,7 +119,4 @@ public class GenderController : BaseApiController
             Content = response
         });
     }
-
-
 }
-

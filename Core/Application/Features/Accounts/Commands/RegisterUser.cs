@@ -5,7 +5,9 @@
 
 using Application.Features.Accounts.Events;
 using Application.Services.Externals;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Accounts.Commands;
@@ -57,19 +59,13 @@ public class RegisterUserValidator : AbstractValidator<RegisterUserRequest>
 }
 
 
-public class RegisterUserHandler : IRequestHandler<RegisterUserRequest, RegisterUserResult>
+public class RegisterUserHandler(
+    IMediator mediator,
+    IIdentityService identityService
+        ) : IRequestHandler<RegisterUserRequest, RegisterUserResult>
 {
-    private readonly IMediator _mediator;
-    private readonly IIdentityService _identityService;
-
-    public RegisterUserHandler(
-        IMediator mediator,
-        IIdentityService identityService
-        )
-    {
-        _identityService = identityService;
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
+    private readonly IIdentityService _identityService = identityService;
 
     public async Task<RegisterUserResult> Handle(RegisterUserRequest request, CancellationToken cancellationToken)
     {
@@ -90,7 +86,7 @@ public class RegisterUserHandler : IRequestHandler<RegisterUserRequest, Register
             result.SendEmailConfirmation,
             request.Host
         );
-        await _mediator.Publish(registerUserEvent);
+        await _mediator.Publish(registerUserEvent, cancellationToken);
 
         return result;
     }

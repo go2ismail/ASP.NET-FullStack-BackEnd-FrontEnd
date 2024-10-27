@@ -5,7 +5,9 @@
 
 using Domain.Bases;
 using Domain.Constants;
+
 using Infrastructure.SecurityManagers.AspNetIdentity;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

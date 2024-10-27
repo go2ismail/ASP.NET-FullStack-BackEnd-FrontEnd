@@ -20,9 +20,9 @@ public class ApplicationUser : IdentityUser
     public DateTime? UpdatedAt { get; set; }
     public string? UpdatedById { get; set; }
 
-
     public ApplicationUser(
         string email,
+        string userName,
         string firstName,
         string lastName,
         string? createdById
@@ -33,7 +33,7 @@ public class ApplicationUser : IdentityUser
         IsDeleted = false;
         CreatedAt = DateTime.UtcNow;
         Email = email.Trim();
-        UserName = Email;
+        UserName = userName.Trim();
         FirstName = firstName.Trim();
         LastName = lastName.Trim();
         CreatedById = createdById?.Trim();

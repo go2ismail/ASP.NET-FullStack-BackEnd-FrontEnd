@@ -6,9 +6,12 @@
 using Application.Services.CQS.Queries;
 using Application.Services.Externals;
 using Application.Services.Repositories;
+
 using Domain.Constants;
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
 
 namespace Application.Features.Configs.Commands;
@@ -61,32 +64,20 @@ public class UpdateConfigValidator : AbstractValidator<UpdateConfigRequest>
 }
 
 
-public class UpdateConfigHandler : IRequestHandler<UpdateConfigRequest, UpdateConfigResult>
+public class UpdateConfigHandler(
+    IBaseCommandRepository<Config> repository,
+    IUnitOfWork unitOfWork,
+    IEncryptionService encryptionService
+        ) : IRequestHandler<UpdateConfigRequest, UpdateConfigResult>
 {
-    private readonly IBaseCommandRepository<Config> _repository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IEncryptionService _encryptionService;
-
-    public UpdateConfigHandler(
-        IBaseCommandRepository<Config> repository,
-        IUnitOfWork unitOfWork,
-        IEncryptionService encryptionService
-        )
-    {
-        _repository = repository;
-        _unitOfWork = unitOfWork;
-        _encryptionService = encryptionService;
-    }
+    private readonly IBaseCommandRepository<Config> _repository = repository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IEncryptionService _encryptionService = encryptionService;
 
     public async Task<UpdateConfigResult> Handle(UpdateConfigRequest request, CancellationToken cancellationToken = default)
     {
 
-        var entity = await _repository.GetAsync(request.Id, cancellationToken);
-
-        if (entity == null)
-        {
-            throw new ApplicationException($"{ExceptionConsts.EntitiyNotFound} {request.Id}");
-        }
+        var entity = await _repository.GetAsync(request.Id, cancellationToken) ?? throw new ApplicationException($"{ExceptionConsts.EntitiyNotFound} {request.Id}");
 
         //ensure have only one: active
         if (request.Active == true)

@@ -4,10 +4,15 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.CQS.Queries;
+
 using AutoMapper;
+
 using Domain.Entities;
+
 using FluentValidation;
+
 using MediatR;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.CustomerSubGroups.Queries;

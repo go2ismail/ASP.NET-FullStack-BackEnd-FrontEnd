@@ -7,6 +7,7 @@ using Domain.Bases;
 using Domain.Constants;
 using Domain.Exceptions;
 using Domain.Interfaces;
+
 using System.Collections.ObjectModel;
 
 namespace Domain.Entities;

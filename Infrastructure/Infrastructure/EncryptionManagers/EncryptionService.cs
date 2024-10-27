@@ -4,6 +4,7 @@
 // ----------------------------------------------------------------------------
 
 using Application.Services.Externals;
+
 using System.Security.Cryptography;
 using System.Text;
 
@@ -17,20 +18,20 @@ public class EncryptionService : IEncryptionService
 
     public string Encrypt(string plainText)
     {
-        using (Aes aesAlg = Aes.Create())
+        using (var aesAlg = Aes.Create())
         {
             aesAlg.Key = GenerateKey(encryptionKey);
             aesAlg.GenerateIV();
 
             ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
 
-            using (MemoryStream msEncrypt = new MemoryStream())
+            using (var msEncrypt = new MemoryStream())
             {
                 msEncrypt.Write(aesAlg.IV, 0, aesAlg.IV.Length);
 
-                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                 {
-                    using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                    using (var swEncrypt = new StreamWriter(csEncrypt))
                     {
                         swEncrypt.Write(plainText);
                     }
@@ -45,7 +46,7 @@ public class EncryptionService : IEncryptionService
     {
         byte[] fullCipher = Convert.FromBase64String(cipherText);
 
-        using (Aes aesAlg = Aes.Create())
+        using (var aesAlg = Aes.Create())
         {
             aesAlg.Key = GenerateKey(encryptionKey);
 
@@ -59,11 +60,11 @@ public class EncryptionService : IEncryptionService
 
             ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
-            using (MemoryStream msDecrypt = new MemoryStream(cipher))
+            using (var msDecrypt = new MemoryStream(cipher))
             {
-                using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                 {
-                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                    using (var srDecrypt = new StreamReader(csDecrypt))
                     {
                         return srDecrypt.ReadToEnd();
                     }
@@ -72,13 +73,5 @@ public class EncryptionService : IEncryptionService
         }
     }
 
-    private byte[] GenerateKey(string key)
-    {
-        using (SHA256 sha256 = SHA256.Create())
-        {
-            return sha256.ComputeHash(Encoding.UTF8.GetBytes(key));
-        }
-    }
+    private static byte[] GenerateKey(string key) => SHA256.HashData(Encoding.UTF8.GetBytes(key));
 }
-
-

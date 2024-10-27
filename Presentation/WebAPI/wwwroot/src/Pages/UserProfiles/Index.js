@@ -71,8 +71,6 @@ const app = createApp({
             successMessage.value = ''
         }
 
-
-
         const refreshClaimTable = () => {
             userProfileClaims.value = claimLookup.value.reduce((entities, claim) => {
                 const [entity, access] = claim.text.split(':')
